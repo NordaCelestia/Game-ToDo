@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Animated, StatusBar, StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack'; 
+import { useNavigation } from '@react-navigation/native';
 
 const Stack = createStackNavigator(); 
 const MenuScreen = () => <View />; 
@@ -10,6 +11,7 @@ export default function Welcome() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(-100));
   const [buttonFadeAnim] = useState(new Animated.Value(0));
+  const navigation = useNavigation();
 
   useEffect(() => {
     Animated.sequence([
@@ -49,6 +51,7 @@ export default function Welcome() {
       useNativeDriver: true,
     }).start();
     
+    navigation.navigate('loginscreen');
   };
 
   return (
