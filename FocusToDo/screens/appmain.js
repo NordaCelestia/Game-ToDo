@@ -1,12 +1,25 @@
+
 import React, { useState } from 'react';
 import { StatusBar, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+
+
+
+const Stack = createNativeStackNavigator();
+
 
 export default function App() {
-  const [isBottomUIExpanded, setIsBottomUIExpanded] = useState(false); // State to track bottom UI expansion
-
+  const [isBottomUIExpanded, setIsBottomUIExpanded] = useState(false); 
+  const navigation = useNavigation();
   const handlePress = () => {
-    setIsBottomUIExpanded(!isBottomUIExpanded); // Toggle bottom UI expansion state
+    setIsBottomUIExpanded(!isBottomUIExpanded); 
+  };
+
+  const goToHelpersPage = () => {
+    navigation.navigate("helpers");
   };
 
   return (
@@ -24,7 +37,7 @@ export default function App() {
               style={styles.gradient}
             >
               <View style={styles.centeredText}>
-                <Text style={styles.bottomUIText}>selam</Text>
+                <Text style={styles.bottomUIText}>Click here to start</Text>
               </View>
               {isBottomUIExpanded && (
                 <View style={styles.buttonContainer}>
@@ -40,8 +53,11 @@ export default function App() {
                     <TouchableOpacity style={styles.button}>
                       <Text style={styles.buttonText}>Button 3</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button}>
-                      <Text style={styles.buttonText}>Button 4</Text>
+                    <TouchableOpacity 
+                      style={styles.button} 
+                      onPress={goToHelpersPage} // Navigate to Helpers page on button press
+                    >
+                      <Text style={styles.buttonText}>Helpers</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
