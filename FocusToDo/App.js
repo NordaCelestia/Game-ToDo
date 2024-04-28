@@ -6,6 +6,7 @@ import Welcome from './screens/welcome';
 import loginscreen from './screens/loginscreen';
 import appmain from './screens/appmain';
 import Helpers from './screens/helpers';
+import Planner from './screens/planner';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ export default function App() {
         <Stack.Screen name="loginscreen" component={loginscreen} />
         <Stack.Screen name="appmain" component={appmain} />
         <Stack.Screen name="helpers" component={Helpers} />
+        <Stack.Screen name="planner" component={Planner} />
       </Stack.Navigator>
 
     </NavigationContainer>

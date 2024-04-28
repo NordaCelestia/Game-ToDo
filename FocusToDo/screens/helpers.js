@@ -1,23 +1,17 @@
 import React from 'react';
 import { StatusBar, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import YouTube from 'react-native-youtube'; // YouTube bileşenini ekleyin
 
 const Helpers = () => {
-  const navigation = useNavigation(); // Navigation'ı başlatın
+  const navigation = useNavigation(); 
 
   const goBack = () => {
-    navigation.goBack(); // Önceki ekrana geri dön
+    navigation.goBack(); 
   };
 
   return (
     <View style={styles.container}>
-      {/* YouTube bileşenini burada kullanın */}
-      <YouTube
-        videoId="n61ULEU7CO0" // Göstermek istediğiniz YouTube videosunun ID'sini buraya ekleyin
-        apiKey="AIzaSyDlZjZqwnFofkF1eh4wdg1dZqnlRskHNlI" // YouTube API anahtarınızı buraya ekleyin
-        style={{ alignSelf: 'stretch', flex: 1 }}
-      />
+      
       <ImageBackground style={styles.background} source={require('../assets/helpers.png')}>
         <Text>Welcome to Helpers page!</Text>
         <Button title="Go Back" onPress={goBack} />
@@ -32,8 +26,8 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    width: '100%', // Ekranın genişliği kadar
-    height: '100%', // Ekranın yüksekliği kadar
+    width: '100%', 
+    height: '100%', 
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -52,7 +46,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  // Diğer stiller buraya eklenebilir
+  
 });
 
 export default Helpers;

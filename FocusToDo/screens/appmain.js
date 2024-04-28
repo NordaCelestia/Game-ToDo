@@ -21,6 +21,10 @@ export default function App() {
   const goToHelpersPage = () => {
     navigation.navigate("helpers");
   };
+  const goToPlannerPage = () => {
+    navigation.navigate("planner");
+  };
+
 
   return (
     <View style={styles.container}>
@@ -42,8 +46,10 @@ export default function App() {
               {isBottomUIExpanded && (
                 <View style={styles.buttonContainer}>
                   <View style={styles.upperButtons}>
-                    <TouchableOpacity style={styles.button}>
+                    <TouchableOpacity style={styles.button} 
+                      onPress={goToPlannerPage}>
                       <Text style={styles.buttonText}>Button 1</Text>
+                      
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button}>
                       <Text style={styles.buttonText}>Button 2</Text>
@@ -55,7 +61,7 @@ export default function App() {
                     </TouchableOpacity>
                     <TouchableOpacity 
                       style={styles.button} 
-                      onPress={goToHelpersPage} // Navigate to Helpers page on button press
+                      onPress={goToHelpersPage} 
                     >
                       <Text style={styles.buttonText}>Helpers</Text>
                     </TouchableOpacity>
