@@ -1,3 +1,4 @@
-Bu hafta karşılama ekranını ve animasyonları üstüne çalıştım. screens kısmındaki welcome.js dosyasının içinde kodlarım.
+4.hafta için uğraştım, ancak uğraştığım kadar ortaya koyamasamda bi şeyler ortaya koydum, hatalar ve farklı paketler çok fazlaydı.
 
-02.04.2024 tarihli commit: login screeni yaptım, kayıt olma kısmını da ekledim, henüz backend bağlamadım, logine tıklayınca uygulama ana sayfasına gidiyor. Henüz alta bi ui ekledim, butonlar vs eklenicek
+28.04.2024 - Planner sayfası eklendi, içine takvim ekledim, takvimde bi tarih seçtiğimizde bunu ekrana yazdırıyor. Helpers sayfasına video ve ses eklemye çalıştım birsürü çözmeediğim sorunla karşılaştım, şu anlık 2.plana attım
+
