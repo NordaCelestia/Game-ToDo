@@ -1,70 +1,133 @@
 import React, { useState } from 'react';
-import { StatusBar, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity, Button } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, ImageBackground, TextInput, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { LinearGradient } from 'expo-linear-gradient'; 
+import { LinearGradient } from 'expo-linear-gradient';
 
-const Helpers = () => {
-    const navigation = useNavigation(); 
-}
 const Planner = () => {
-    const [selectedDate, setSelectedDate] = useState(null); 
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [plans, setPlans] = useState([]);
+    const [newPlanName, setNewPlanName] = useState('');
 
     const tarihSeciminiEleAl = (tarih) => {
         console.log('Seçilen tarih:', tarih);
-        setSelectedDate(tarih); 
-        
+        setSelectedDate(tarih);
     }
 
-    return (
-        <View style={styles.container}>
-           
-            <ImageBackground style={styles.background} source={require('../assets/planner.png')}>
-                
-                <LinearGradient
-                    colors={['rgba(230, 60, 147, 0.8)', 'rgba(230, 60, 147, 0.07)']}
-                    style={styles.gradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                >
-                    <Text style={styles.bottomUIText}>Planner Screen</Text>
-                    {/* Seçilen tarihi göster */}
-                    {selectedDate && <Text style={styles.bottomUIText}>Seçilen Tarih: {selectedDate.dateString}</Text>}
-                </LinearGradient>
-            </ImageBackground>
-            
-            <Calendar onDayPress={tarihSeciminiEleAl} />
+    const planiSil = (id) => {
+        const yeniPlanlar = plans.filter(plan => plan.id !== id);
+        setPlans(yeniPlanlar);
+    }
+
+    const yeniPlanEkle = () => {
+        if (newPlanName.trim() !== '') {
+            setPlans([...plans, { id: Date.now(), date: selectedDate.dateString, plan: newPlanName }]);
+            setNewPlanName('');
+        }
+    }
+
+    const PlanListesi = () => (
+        <View>
+            {plans.map((item) => (
+                <View key={item.id} style={styles.planItem}>
+                    <Text>{item.date}: {item.plan}</Text>
+                    <TouchableOpacity onPress={() => planiSil(item.id)} style={styles.deleteButton}>
+                        <Text style={styles.deleteButtonText}>Sil</Text>
+                    </TouchableOpacity>
+                </View>
+            ))}
         </View>
+    );
+
+    return (
+        <ImageBackground style={styles.container} source={require('../assets/planner.png')}>
+            <LinearGradient
+                colors={['rgba(230, 60, 147, 0.8)', 'rgba(230, 60, 147, 0.07)']}
+                style={styles.gradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+            >
+                <Calendar onDayPress={tarihSeciminiEleAl} />
+
+                <View style={styles.planInputContainer}>
+                    <TextInput
+                        style={styles.planInput}
+                        placeholder="Plan adını girin"
+                        value={newPlanName}
+                        onChangeText={setNewPlanName}
+                    />
+                    <TouchableOpacity onPress={yeniPlanEkle} style={styles.addButton}>
+                        <Text style={styles.addButtonText}>Ekle</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.planListContainer}>
+                    <Text style={styles.planListHeader}>Planned Events</Text>
+                    <PlanListesi />
+                </View>
+            </LinearGradient>
+        </ImageBackground>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-    },
-    background: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     gradient: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'transparent', 
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    bottomUIText: {
-      padding: 60,
-      color: '#661433',
-      fontSize: 20,
-      fontWeight: 'bold',
-      textShadowColor: 'rgba(250, 250, 250, 0.9)',
-      textShadowOffset: { width: 1, height: 2 },
-      textShadowRadius: 0.6,
+    planInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    planInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 8,
+        marginRight: 10,
+    },
+    addButton: {
+        backgroundColor: '#e04091',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+    },
+    addButtonText: {
+        color: '#fff',
+    },
+    planListContainer: {
+        marginTop: 20,
+    },
+    planListHeader: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#fff', // Text color added for better visibility on gradient background
+    },
+    planItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    deleteButton: {
+        backgroundColor: '#e04091',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+    },
+    deleteButtonText: {
+        color: '#fff',
     },
 });
 
