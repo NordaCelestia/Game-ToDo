@@ -7,7 +7,7 @@ import loginscreen from './screens/loginscreen';
 import appmain from './screens/appmain';
 import Helpers from './screens/helpers';
 import Planner from './screens/planner';
-
+import app from '../FocusToDo/firebaseConfig'
 const Stack = createNativeStackNavigator();
 
 export default function App() {

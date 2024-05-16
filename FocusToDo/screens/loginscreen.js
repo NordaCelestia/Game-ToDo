@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import firebase from 'firebase/app';
-import 'firebase/firestore';
+import { getDoc,setDoc,doc} from 'firebase/firestore';
+import { db } from '../firebaseConfig'
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack'; 
+import { useNavigation } from '@react-navigation/native';
 
-const db = firebase.firestore();
+const Stack = createStackNavigator(); 
+
 
 export default function LoginScreen() {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -13,11 +18,12 @@ export default function LoginScreen() {
 
   const handleRegister = async () => {
     try {
-      const userRef = await db.collection('users').add({
-        username: username,
+      await setDoc(doc(db, "users", username), {
+        name: username,
         email: email,
-        password: password,
-      });
+        password:password,
+        
+      });
       console.log('User added with ID: ', userRef.id);
       // You can add navigation logic here to navigate to the main app screen
     } catch (error) {
@@ -27,7 +33,7 @@ export default function LoginScreen() {
   
   const handleLogin = () => {
     console.log(username, password);
-    // Add your navigation logic here for login
+    
   };
 
   return (
