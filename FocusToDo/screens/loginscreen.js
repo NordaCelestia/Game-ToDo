@@ -1,28 +1,34 @@
 import React, { useState } from 'react';
-import { StatusBar, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+import { ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
-const Stack = createNativeStackNavigator();
+const db = firebase.firestore();
 
-export default function App() {
+export default function LoginScreen() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const navigation = useNavigation();
-
+  const handleRegister = async () => {
+    try {
+      const userRef = await db.collection('users').add({
+        username: username,
+        email: email,
+        password: password,
+      });
+      console.log('User added with ID: ', userRef.id);
+      // You can add navigation logic here to navigate to the main app screen
+    } catch (error) {
+      console.error('Error adding user: ', error);
+    }
+  };
+  
   const handleLogin = () => {
     console.log(username, password);
-    navigation.navigate("appmain");
-  }
-
-  const handleRegister = () => {
-    console.log(username, email, password);
-    
-  }
+    // Add your navigation logic here for login
+  };
 
   return (
     <View style={styles.container}>
