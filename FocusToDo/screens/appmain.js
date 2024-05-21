@@ -48,7 +48,7 @@ export default function App() {
                   <View style={styles.upperButtons}>
                     <TouchableOpacity style={styles.button} 
                       onPress={goToPlannerPage}>
-                      <Text style={styles.buttonText}>Button 1</Text>
+                      <Text style={styles.buttonText}>Planner</Text>
                       
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button}>

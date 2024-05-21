@@ -1,39 +1,52 @@
 import React, { useState } from 'react';
 import { ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import firebase from 'firebase/app';
-import { getDoc,setDoc,doc} from 'firebase/firestore';
-import { db } from '../firebaseConfig'
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack'; 
+import { getDoc, setDoc, doc } from 'firebase/firestore';
+import { db, auth } from '../firebaseConfig'; 
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
-
-const Stack = createStackNavigator(); 
-
 
 export default function LoginScreen() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigation = useNavigation();
 
   const handleRegister = async () => {
     try {
-      await setDoc(doc(db, "users", username), {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
         name: username,
         email: email,
-        password:password,
-        
-      });
-      console.log('User added with ID: ', userRef.id);
-      // You can add navigation logic here to navigate to the main app screen
+      });
+
+      console.log('User added with ID: ', user.uid);
+      navigation.navigate('appmain');
     } catch (error) {
       console.error('Error adding user: ', error);
     }
   };
-  
-  const handleLogin = () => {
-    console.log(username, password);
-    
+
+  const handleLogin = async () => {
+    try {
+      console.log('Trying to sign in with', email, password); 
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      console.log('Logged in with user ID: ', user.uid);
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        console.log('User data:', userDoc.data());
+        navigation.navigate('appmain');
+      } else {
+        console.log('No such user!');
+      }
+    } catch (error) {
+      console.error('Error logging in: ', error.message);
+    }
   };
 
   return (
@@ -73,17 +86,17 @@ export default function LoginScreen() {
             <TextInput
               placeholderTextColor={'#ff9cc7'}
               style={styles.input}
-              placeholder="Username"
-              onChangeText={newUsername => setUsername(newUsername)}
-              defaultValue={username}
+              placeholder="Email"
+              onChangeText={newEmail => setEmail(newEmail)}
+              value={email}
             />
             <TextInput
               placeholderTextColor={'#ff9cc7'}
               style={styles.input}
               placeholder="Password"
               onChangeText={newPassword => setPassword(newPassword)}
-              defaultValue={password}
-              secureTextEntry={true} 
+              value={password}
+              secureTextEntry={true}
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -106,44 +119,44 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonContainer: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     marginTop: 20,
   },
   button: {
     backgroundColor: 'rgba(230, 60, 147,0.6)',
     padding: 10,
     borderRadius: 5,
-    width: '40%', 
-    alignItems: 'center', 
-    marginHorizontal: 10, 
+    width: '40%',
+    alignItems: 'center',
+    marginHorizontal: 10,
   },
   textcenter: {
-    color: '#FFF', 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    marginTop: -30, 
+    color: '#FFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: -30,
   },
   input: {
     height: 40,
-    width: '80%', 
-    backgroundColor: 'rgba(230, 60, 147,0.6)', 
+    width: '80%',
+    backgroundColor: 'rgba(230, 60, 147,0.6)',
     margin: 15,
-    padding: 10, 
+    padding: 10,
   },
   buttonText: {
-    color: '#FFF', 
-    fontSize: 18, 
+    color: '#FFF',
+    fontSize: 18,
   },
   backButton: {
     backgroundColor: 'rgba(230, 60, 147,0.6)',
     padding: 10,
     borderRadius: 5,
-    width: '40%', 
-    alignItems: 'center', 
+    width: '40%',
+    alignItems: 'center',
     marginTop: 20,
   },
 });
