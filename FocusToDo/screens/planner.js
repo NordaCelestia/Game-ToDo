@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ImageBackground, TextInput, StyleSheet, M
 import { Calendar } from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
 import { addDoc, collection, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { db, auth } from '../firebaseConfig';
 
 const Planner = () => {
     const [showAddPlan, setShowAddPlan] = useState(false);
@@ -13,8 +13,12 @@ const Planner = () => {
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
+    const user = auth.currentUser;
+
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'plans'), (snapshot) => {
+        if (!user) return;
+
+        const unsubscribe = onSnapshot(collection(db, `users/${user.uid}/plans`), (snapshot) => {
             const loadedPlans = [];
             snapshot.forEach((doc) => {
                 loadedPlans.push({ id: doc.id, ...doc.data() });
@@ -23,12 +27,12 @@ const Planner = () => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [user]);
 
     const handleAddPlan = async () => {
-        if (newPlanName.trim() !== '' && selectedDate) {
+        if (newPlanName.trim() !== '' && selectedDate && user) {
             try {
-                const docRef = await addDoc(collection(db, 'plans'), {
+                await addDoc(collection(db, `users/${user.uid}/plans`), {
                     name: newPlanName,
                     date: selectedDate.dateString,
                     description: '',
@@ -45,7 +49,7 @@ const Planner = () => {
     const handleUpdatePlan = async () => {
         if (selectedPlan) {
             try {
-                const planRef = doc(db, 'plans', selectedPlan.id);
+                const planRef = doc(db, `users/${user.uid}/plans`, selectedPlan.id);
                 await updateDoc(planRef, {
                     name: selectedPlan.name,
                     description: selectedPlan.description,
@@ -60,7 +64,7 @@ const Planner = () => {
 
     const handleDeletePlan = async (planId) => {
         try {
-            await deleteDoc(doc(db, 'plans', planId));
+            await deleteDoc(doc(db, `users/${user.uid}/plans`, planId));
             setIsModalVisible(false);
             setSelectedPlan(null);
         } catch (error) {
@@ -81,11 +85,16 @@ const Planner = () => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
             >
-                {!showAddPlan ? (
-                    <TouchableOpacity onPress={() => setShowAddPlan(true)} style={styles.addButton}>
-                        <Text style={styles.addButtonText}>Plan Ekle</Text>
-                    </TouchableOpacity>
-                ) : (
+                <View style={styles.planListContainer}>
+                    <Text style={styles.planListHeader}>Planned Events</Text>
+                    {plans.map((item) => (
+                        <TouchableOpacity key={item.id} onPress={() => openModal(item)} style={styles.planItem}>
+                            <Text style={styles.planText}>{item.date}: {item.name}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                {showAddPlan && (
                     <View style={styles.addPlanContainer}>
                         <TextInput
                             style={styles.planInput}
@@ -102,15 +111,6 @@ const Planner = () => {
                         </TouchableOpacity>
                     </View>
                 )}
-
-                <View style={styles.planListContainer}>
-                    <Text style={styles.planListHeader}>Planned Events</Text>
-                    {plans.map((item) => (
-                        <TouchableOpacity key={item.id} onPress={() => openModal(item)} style={styles.planItem}>
-                            <Text style={styles.planText}>{item.date}: {item.name}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
             </LinearGradient>
 
             {selectedPlan && (
@@ -152,6 +152,10 @@ const Planner = () => {
                     </View>
                 </Modal>
             )}
+
+            <TouchableOpacity onPress={() => setShowAddPlan(!showAddPlan)} style={styles.addButtonBottomRight}>
+                <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
         </ImageBackground>
     );
 };
@@ -174,9 +178,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         borderRadius: 5,
         marginBottom: 10,
+        fontSize: 10,
     },
     addButtonText: {
         color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     addPlanContainer: {
         alignItems: 'center',
@@ -191,13 +199,15 @@ const styles = StyleSheet.create({
         width: '80%',
     },
     planListContainer: {
-        marginTop: 20,
+        marginTop: -400,
+        alignItems: 'center',
     },
     planListHeader: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 50,
         color: '#fff',
+        textAlign: 'center',
     },
     planItem: {
         padding: 10,
@@ -237,7 +247,8 @@ const styles = StyleSheet.create({
     },
     modalButton: {
         backgroundColor: '#e04091',
-        padding: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         borderRadius: 5,
         marginTop: 10,
     },
@@ -246,6 +257,14 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         backgroundColor: '#ff3b30',
+    },
+    addButtonBottomRight: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        padding: 20,
+        backgroundColor: '#e04091',
+        borderRadius: 50,
     },
 });
 
