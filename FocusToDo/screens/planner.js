@@ -77,6 +77,26 @@ const Planner = () => {
         setIsModalVisible(true);
     };
 
+    const getMarkedDates = () => {
+        const markedDates = {};
+        plans.forEach((plan) => {
+            markedDates[plan.date] = {
+                marked: true,
+                dotColor: '#e04091',
+                customStyles: {
+                    container: {
+                        backgroundColor: 'transparent',
+                    },
+                    text: {
+                        color: '#e04091',
+                        fontWeight: 'bold',
+                    },
+                },
+            };
+        });
+        return markedDates;
+    };
+
     return (
         <ImageBackground style={styles.container} source={require('../assets/planner.png')}>
             <LinearGradient
@@ -104,7 +124,8 @@ const Planner = () => {
                         />
                         <Calendar
                             onDayPress={(day) => setSelectedDate(day)}
-                            markedDates={selectedDate ? { [selectedDate.dateString]: { selected: true } } : {}}
+                            markedDates={selectedDate ? { ...getMarkedDates(), [selectedDate.dateString]: { selected: true, selectedColor: '#e04091' } } : getMarkedDates()}
+                            markingType={'custom'}
                         />
                         <TouchableOpacity onPress={handleAddPlan} style={styles.addButton}>
                             <Text style={styles.addButtonText}>Ekle</Text>
@@ -178,7 +199,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         borderRadius: 5,
         marginBottom: 10,
-        fontSize: 10,
     },
     addButtonText: {
         color: '#fff',
@@ -188,7 +208,7 @@ const styles = StyleSheet.create({
     },
     addPlanContainer: {
         alignItems: 'center',
-        marginBottom: 10,
+        marginTop: 250,
     },
     planInput: {
         borderWidth: 1,
