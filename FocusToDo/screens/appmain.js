@@ -24,6 +24,9 @@ export default function App() {
   const goToPlannerPage = () => {
     navigation.navigate("planner");
   };
+  const goToProfilePage = () => {
+    navigation.navigate("profile");
+  };
 
 
   return (
@@ -52,12 +55,13 @@ export default function App() {
                       
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button}>
-                      <Text style={styles.buttonText}>Button 2</Text>
+                      <Text style={styles.buttonText}>Soon!</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.lowerButtons}>
-                    <TouchableOpacity style={styles.button}>
-                      <Text style={styles.buttonText}>Button 3</Text>
+                    <TouchableOpacity style={styles.button}
+                    onPress={goToProfilePage}>
+                      <Text style={styles.buttonText}>Profile</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                       style={styles.button} 

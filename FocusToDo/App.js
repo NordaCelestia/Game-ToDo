@@ -8,6 +8,7 @@ import appmain from './screens/appmain';
 import Helpers from './screens/helpers';
 import Planner from './screens/planner';
 import app from '../FocusToDo/firebaseConfig'
+import Profile from './screens/profile';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Stack.Screen name="appmain" component={appmain} />
         <Stack.Screen name="helpers" component={Helpers} />
         <Stack.Screen name="planner" component={Planner} />
+        <Stack.Screen name="profile" component={Profile} />
       </Stack.Navigator>
 
     </NavigationContainer>
