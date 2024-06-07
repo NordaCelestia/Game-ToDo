@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { db, auth } from '../firebaseConfig';
-import { collection, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
-import Checkbox from 'expo-checkbox';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Audio } from 'expo-av';
 
 const Profile = () => {
@@ -17,6 +16,8 @@ const Profile = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [plans, setPlans] = useState([]);
   const [userPoints, setUserPoints] = useState(0);
+  const [userName, setUserName] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
   const soundRef = useRef(null);
 
   useEffect(() => {
@@ -26,6 +27,9 @@ const Profile = () => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setUserPoints(data.points || 0);
+          setUserName(data.name || 'No Name');
+        } else {
+          setUserName('No Name');
         }
       });
     }
@@ -76,14 +80,29 @@ const Profile = () => {
         usersList.push({ id: doc.id, ...doc.data() });
       });
       setUsers(usersList);
+      setFilteredUsers(usersList); // Set filtered users initially to all users
     } catch (error) {
       console.error('Error fetching users: ', error);
     }
   };
 
   const handleSearch = () => {
-    const filtered = users.filter(user => user.displayName && user.displayName.toLowerCase().includes(search.toLowerCase()));
+    const filtered = users.filter(user => user.name && user.name.toLowerCase().includes(search.toLowerCase()));
     setFilteredUsers(filtered);
+  };
+
+  const handleSortByPoints = () => {
+    console.log('Sorting users by points...');
+    const sorted = [...filteredUsers].sort((a, b) => {
+      if (sortOrder === 'asc') {
+        return a.points - b.points;
+      } else {
+        return b.points - a.points;
+      }
+    });
+    setFilteredUsers(sorted);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    console.log('Sorted users:', sorted);
   };
 
   const fetchPlans = async (userId) => {
@@ -92,7 +111,7 @@ const Profile = () => {
       const userPlans = [];
       plansSnapshot.forEach((doc) => {
         const planData = doc.data();
-        if (planData.public) {
+        if (planData.privacy === 'public') {
           userPlans.push({ id: doc.id, ...planData });
         }
       });
@@ -102,40 +121,14 @@ const Profile = () => {
     }
   };
 
-  const handleToggleComplete = async (plan) => {
-    try {
-      const planRef = doc(db, `users/${selectedUser.id}/plans`, plan.id);
-      await updateDoc(planRef, { completed: !plan.completed });
-      if (!plan.completed) {
-        let pointsToAdd = 0;
-        switch (plan.frequency) {
-          case 'daily':
-            pointsToAdd = 100;
-            break;
-          case 'weekly':
-            pointsToAdd = 200;
-            break;
-          case 'monthly':
-            pointsToAdd = 500;
-            break;
-          default:
-            pointsToAdd = 0;
-            break;
-        }
-        await updateDoc(doc(db, 'users', selectedUser.id), { points: selectedUser.points + pointsToAdd });
-        setSelectedUser((prevUser) => ({ ...prevUser, points: prevUser.points + pointsToAdd }));
-      }
-      playSound();
-    } catch (error) {
-      console.error('Error toggling plan completion: ', error);
-    }
-  };
-
   const handleUserSelect = async (userId) => {
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
-      setSelectedUser({ id: userId, ...userDoc.data() });
-      fetchPlans(userId);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setSelectedUser({ id: userId, ...userData });
+        fetchPlans(userId);
+      }
     } catch (error) {
       console.error('Error selecting user: ', error);
     }
@@ -150,7 +143,7 @@ const Profile = () => {
       <View style={styles.container}>
         {showMyProfile ? (
           <>
-            <Text style={styles.label}>Name: {user.displayName}</Text>
+            <Text style={styles.boldLabel}>Name: {userName}</Text>
             <Text style={styles.boldLabel}>Email: {user.email}</Text>
             <Text style={styles.boldLabel}>Points: {userPoints}</Text>
             {showPasswordFields && (
@@ -183,7 +176,7 @@ const Profile = () => {
           </>
         ) : selectedUser ? (
           <>
-            <Text style={styles.label}>Name: {selectedUser.displayName}</Text>
+            <Text style={styles.boldLabel}>Name: {selectedUser.name}</Text>
             <Text style={styles.boldLabel}>Points: {selectedUser.points}</Text>
             <TouchableOpacity style={styles.button} onPress={() => setSelectedUser(null)}>
               <Text style={styles.buttonText}>Back</Text>
@@ -194,11 +187,6 @@ const Profile = () => {
               renderItem={({ item }) => (
                 <View style={styles.planItemContainer}>
                   <Text style={styles.planText}>{item.name}</Text>
-                  <Checkbox
-                    value={item.completed}
-                    onValueChange={() => handleToggleComplete(item)}
-                    color={item.completed ? '#e04091' : '#e04091'}
-                  />
                 </View>
               )}
             />
@@ -214,6 +202,9 @@ const Profile = () => {
             <TouchableOpacity style={styles.button} onPress={handleSearch}>
               <Text style={styles.buttonText}>Search</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleSortByPoints}>
+              <Text style={styles.buttonText}>Sort by Points ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})</Text>
+            </TouchableOpacity>
             <FlatList
               data={filteredUsers}
               keyExtractor={(item) => item.id}
@@ -222,7 +213,8 @@ const Profile = () => {
                   style={styles.userItem}
                   onPress={() => handleUserSelect(item.id)}
                 >
-                  <Text style={styles.userName}>{item.displayName}</Text>
+                  <Text style={styles.userName}>{item.name}</Text>
+                  <Text style={styles.userPoints}>Points: {item.points}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -290,18 +282,29 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFF',
+    textShadowColor: 'rgba(255, 0, 127, 1)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 3,
+  },
+  userPoints: {
+    fontSize: 14,
+    color: '#FFF',
+    textShadowColor: 'rgba(255, 0, 127, 1)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 3,
   },
   planItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    width: '100%',
+    backgroundColor: 'rgba(255, 20, 147, 0.7)', // Pembe-kırmızı arası ve şeffaf
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 5,
   },
   planText: {
-    fontSize: 16,
-    flex: 1,
+    fontSize: 18,
+    fontWeight: 'bold', // Yazı tipi kalın
+    color: '#FFF',
   },
 });
 
